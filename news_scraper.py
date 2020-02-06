@@ -16,9 +16,26 @@ class TutByScraper(SiteScraper):
 	def get_news(self):
 		res = requests.get(self.url)
 		soup = BeautifulSoup(res.content, 'html.parser')
-		news = soup.findAll('div', id_='latest')
+		all_news = soup.find('div', id='latest')
+		news_links = all_news.find_all('a', class_='entry__link io-block-link')
 
-		print(news)
+		for news in news_links:
+			article_header = news.find('span', class_='entry-head _title').text
+			article_link = news.get('href')
+			article_res = requests.get(article_link)
+			article_soup = BeautifulSoup(article_res.content, 'html.parser')
+			article_body = article_soup.find('div', id='article_body').find_all('p')
+			article_text = ' '.join([paragraph.get_text() for paragraph in article_body])
+			
+			print(article_link)
+			print(article_header)			
+			print(article_text)
+			print(' ')
+
+			
+
+
+		#print(news_links)
 
 bruh = TutByScraper('')
 
