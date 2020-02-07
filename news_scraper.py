@@ -41,7 +41,7 @@ class TutByScraper(SiteScraper):
 class YandexScraper(SiteScraper):
 	def __init__(self, url):
 		self.url = 'https://yandex.by/'
-		self.name = 'yandex.by/'
+		self.name = 'yandex.by'
 
 	def get_news(self):
 		res = requests.get(self.url)
@@ -65,9 +65,34 @@ class YandexScraper(SiteScraper):
 			})
 		return news_dict
 
-# bruh = YandexScraper('')
-# bruh.get_news()
-show_news = YandexScraper('')
+class RbcRuScraper(SiteScraper):
+	def __init__(self, url):
+		self.url = 'https://www.rbc.ru/'
+		self.name = 'rbc.ru'
+	def get_news(self):
+		res = requests.get(self.url)
+		soup = BeautifulSoup(res.content, 'html.parser')
+		all_news = soup.find('div', class_='js-news-feed-list')
+		news_links = all_news.find_all('a', class_='news-feed__item js-news-feed-item js-yandex-counter')
+		news_dict = []
+		for news in news_links:
+			article_link = news.get('href')
+			article_res = requests.get(article_link)
+			article_soup = BeautifulSoup(article_res.content, 'html.parser')
+			article_header = article_soup.find(itemprop='headline').text
+			article_body = article_soup.find('div', itemprop='articleBody').find_all('p')
+			article_text = ' '.join([paragraph.get_text() for paragraph in article_body]).replace(u'\xa0', u' ')
+
+			news_dict.append({
+				"name": self.name,
+				"link": article_link,
+				"header": article_header,
+				"text": article_text
+			})	
+		return news_dict	
+
+
+show_news = RbcRuScraper('')
 print(show_news.get_news())		
 
 
