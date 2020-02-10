@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 from abc import ABC, abstractmethod
-import json
 
 class SiteScraper(ABC):
 
@@ -10,7 +9,7 @@ class SiteScraper(ABC):
 		pass
 
 class TutByScraper(SiteScraper):
-	def __init__(self, url):
+	def __init__(self):
 		self.url = 'https://www.tut.by/'
 		self.name = 'tut.by'
 
@@ -39,7 +38,7 @@ class TutByScraper(SiteScraper):
 		return news_dict
 
 class YandexScraper(SiteScraper):
-	def __init__(self, url):
+	def __init__(self):
 		self.url = 'https://yandex.by/'
 		self.name = 'yandex.by'
 
@@ -66,7 +65,7 @@ class YandexScraper(SiteScraper):
 		return news_dict
 
 class RbcRuScraper(SiteScraper):
-	def __init__(self, url):
+	def __init__(self):
 		self.url = 'https://www.rbc.ru/'
 		self.name = 'rbc.ru'
 	def get_news(self):
@@ -77,11 +76,11 @@ class RbcRuScraper(SiteScraper):
 		news_dict = []
 		for news in news_links:
 			article_link = news.get('href')
-			article_res = requests.get(article_link)
+			article_res = requests.get(article_link.strip())
 			article_soup = BeautifulSoup(article_res.content, 'html.parser')
 			article_header = article_soup.find(itemprop='headline').text
 			article_body = article_soup.find('div', itemprop='articleBody').find_all('p')
-			article_text = ' '.join([paragraph.get_text() for paragraph in article_body]).replace(u'\xa0', u' ')
+			article_text = ' '.join([paragraph.get_text() for paragraph in article_body]).replace(u'\xa0', u' ').strip()
 
 			news_dict.append({
 				"name": self.name,
@@ -89,10 +88,17 @@ class RbcRuScraper(SiteScraper):
 				"header": article_header,
 				"text": article_text
 			})	
-		return news_dict	
+		return news_dict
+
+class SiteScraperFactory():
+	def get_scraper(self, scraper_name):
+		if scraper_name == 'TutByScraper':
+			return TutByScraper()
+		elif scraper_name == 'YandexScraper':
+			return YandexScraper()
+		elif scraper_name == 'RbcRuScraper':
+			return RbcRuScraper()	
 
 
-show_news = RbcRuScraper('')
-print(show_news.get_news())		
 
 
