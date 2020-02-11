@@ -27,7 +27,7 @@ class TutByScraper(SiteScraper):
 			article_res = requests.get(article_link)
 			article_soup = BeautifulSoup(article_res.content, 'html.parser')
 			article_body = article_soup.find('div', id='article_body').find_all('p')
-			article_text = ' '.join([paragraph.get_text() for paragraph in article_body]).replace(u'\xa0', u' ')
+			article_text = ' '.join([paragraph.get_text(strip=True) for paragraph in article_body]).replace(u'\xa0', u' ')
 
 			news_dict.append({
 				"name": self.name,
@@ -76,11 +76,13 @@ class RbcRuScraper(SiteScraper):
 		news_dict = []
 		for news in news_links:
 			article_link = news.get('href')
+
 			article_res = requests.get(article_link.strip())
 			article_soup = BeautifulSoup(article_res.content, 'html.parser')
 			article_header = article_soup.find(itemprop='headline').text
+
 			article_body = article_soup.find('div', itemprop='articleBody').find_all('p')
-			article_text = ' '.join([paragraph.get_text() for paragraph in article_body]).replace(u'\xa0', u' ').strip()
+			article_text = ' '.join([paragraph.get_text(strip=True) for paragraph in article_body]).replace(u'\xa0', u' ').strip()
 
 			news_dict.append({
 				"name": self.name,
@@ -98,6 +100,7 @@ class SiteScraperFactory():
 			return YandexScraper()
 		elif scraper_name == 'RbcRuScraper':
 			return RbcRuScraper()	
+
 
 
 
