@@ -21,20 +21,24 @@ class TutByScraper(SiteScraper):
 		news_dict = []
 
 		for news in news_links:
-			article_header = news.find('span', class_='entry-head _title').text.replace(u'\xa0', u' ')
+			try:
+				article_header = news.find('span', class_='entry-head _title').text.replace(u'\xa0', u' ')
 
-			article_link = news.get('href')
-			article_res = requests.get(article_link)
-			article_soup = BeautifulSoup(article_res.content, 'html.parser')
-			article_body = article_soup.find('div', id='article_body').find_all('p')
-			article_text = ' '.join([paragraph.get_text(strip=True) for paragraph in article_body]).replace(u'\xa0', u' ')
+				article_link = news.get('href')
+				article_res = requests.get(article_link)
+				article_soup = BeautifulSoup(article_res.content, 'html.parser')
+				article_body = article_soup.find(id='article_body').find_all('p')
+				article_text = ' '.join([paragraph.get_text(strip=True) for paragraph in article_body]).replace(u'\xa0', u' ')
 
-			news_dict.append({
-				"name": self.name,
-				"link": article_link,
-				"header": article_header,
-				"text": article_text
-			})
+				news_dict.append({
+					"name": self.name,
+					"link": article_link,
+					"header": article_header,
+					"text": article_text
+				})
+			except AttributeError  as error:
+				continue
+
 		return news_dict
 
 class YandexScraper(SiteScraper):
@@ -50,18 +54,22 @@ class YandexScraper(SiteScraper):
 		news_dict = []
 
 		for news in news_links:
-			article_link = news.get('href')
-			article_res = requests.get(article_link)
-			article_soup = BeautifulSoup(article_res.content, 'html.parser')
-			article_header = article_soup.find('span', class_='story__head-wrap').text
-			article_text = article_soup.find('div', class_='doc__text').text
+			try:
+				article_link = news.get('href')
+				article_res = requests.get(article_link)
+				article_soup = BeautifulSoup(article_res.content, 'html.parser')
+				article_header = article_soup.find('span', class_='story__head-wrap').text
+				article_text = article_soup.find('div', class_='doc__text').text
 
-			news_dict.append({
-				"name": self.name,
-				"link": article_link,
-				"header": article_header,
-				"text": article_text
-			})
+				news_dict.append({
+					"name": self.name,
+					"link": article_link,
+					"header": article_header,
+					"text": article_text
+				})
+			except AttributeError  as error:
+				continue
+
 		return news_dict
 
 class RbcRuScraper(SiteScraper):
@@ -75,21 +83,25 @@ class RbcRuScraper(SiteScraper):
 		news_links = all_news.find_all('a', class_='news-feed__item js-news-feed-item js-yandex-counter')
 		news_dict = []
 		for news in news_links:
-			article_link = news.get('href')
+			try:
+				article_link = news.get('href')
 
-			article_res = requests.get(article_link.strip())
-			article_soup = BeautifulSoup(article_res.content, 'html.parser')
-			article_header = article_soup.find(itemprop='headline').text
+				article_res = requests.get(article_link.strip())
+				article_soup = BeautifulSoup(article_res.content, 'html.parser')
+				article_header = article_soup.find(itemprop='headline').text
 
-			article_body = article_soup.find('div', itemprop='articleBody').find_all('p')
-			article_text = ' '.join([paragraph.get_text(strip=True) for paragraph in article_body]).replace(u'\xa0', u' ').strip()
+				article_body = article_soup.find('div', itemprop='articleBody').find_all('p')
+				article_text = ' '.join([paragraph.get_text(strip=True) for paragraph in article_body]).replace(u'\xa0', u' ').strip()
 
-			news_dict.append({
-				"name": self.name,
-				"link": article_link,
-				"header": article_header,
-				"text": article_text
-			})	
+				news_dict.append({
+					"name": self.name,
+					"link": article_link,
+					"header": article_header,
+					"text": article_text
+				})	
+			except AttributeError  as error:
+				continue
+
 		return news_dict
 
 class SiteScraperFactory():
